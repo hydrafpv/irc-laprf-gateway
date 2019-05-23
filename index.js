@@ -1,5 +1,5 @@
 // Replace this with your Event Timer IP Address (if present)
-const EventTimerIP = "192.168.1.9" // set to an empty string ("") to use the USB Puck
+const EventTimerIP = "192.168.1.9"; // set to an empty string ("") to use the USB Puck
 
 // Imports
 const SerialPort = require('serialport')
@@ -17,16 +17,16 @@ const sockets = {};
 // Event Timer Connection (set EventTimerIP to "" if using the Puck. See above.)
 // The Event Timer must be connectable when you run the Gateway.
 // TODO: In the event of an error (not connectable), retry after 20 seconds...?
-if (EventTimerIP.length > 0) {
-    console.log('Attempting to connect to Event Timer: ' + EventTimerIP)
+if (EventTimerIP && EventTimerIP.length > 0) {
+    console.log('Attempting to connect to Event Timer: ' + EventTimerIP);
     const timerOptions = {
         host: EventTimerIP,
         port: 5403
     }
     eventTimer = Net.createConnection(timerOptions, () => {
         console.log('Event Timer Connected');
-        eventTimer.on('data', function (data) {    
-            console.log('Event Timer Data...')
+        eventTimer.on('data', function (data) {
+            console.log('Event Timer Data...');
             // Forward all data (Buffer) to each client socket
             for (var address in sockets) {
                 console.log('      ... Forwarding to ' + address);
@@ -34,8 +34,13 @@ if (EventTimerIP.length > 0) {
                 socket.write(data);
             }
         });
+        eventTimer.on('error', (err) => {
+            // Errors Happen. Open an Issue on Github!
+            console.log('Is the Event Timer reachable?');
+            console.error(JSON.stringify(err));
+        });
         eventTimer.on('end', function () {
-            eventTimer = null
+            eventTimer = null;
         });
     });
 
@@ -66,7 +71,7 @@ if (EventTimerIP.length > 0) {
                 ports.forEach(function(port) {
                     // Only interested in the ImmersionRC Vendor and LapRF Puck Product
                     if (port.vendorId === '04d8' & port.productId === '000a') {
-                        openPuck(port.comName)
+                        openPuck(port.comName);
                     }
                 });
             }
@@ -74,7 +79,7 @@ if (EventTimerIP.length > 0) {
     }
 
     // Do an initial search for the USB Puck at launch
-    findSerialDevice()
+    findSerialDevice();
 
     // USB Detector for the Puck (Puck is not plugged in after launch of the Gateway)
     USBDetect.startMonitoring();
@@ -87,7 +92,10 @@ if (EventTimerIP.length > 0) {
         console.log("Puck Disconnected")
         // TODO / BUG: If you plug a second Puck in and then remove it, it nulls out the first puck
         // Work around: Don't do that.
-        puck = null
+        // Issue: the device (USB) doesn't provide information about the Serial port directly.
+        // ... would need to do an additional scan of the serial ports and see if the puck was gone.
+        // So just don't do that.
+        puck = null;
     });
 }
 
@@ -96,7 +104,7 @@ const server = Net.createServer(client => {
     // Client connected, store it where the Puck / Event Timer can get at it
     sockets[client.remoteAddress] = client;
     client.on('data', function (data) {    
-        console.log('Socket Data...')
+        console.log('Socket Data...');
         if (eventTimer) {
             console.log('      ... Forwarding to Event Timer');
             eventTimer.write(data);
@@ -106,7 +114,7 @@ const server = Net.createServer(client => {
         }
     });
     client.on('error', (err) => {
-    // Errors Happen. Open an Issue on Github!
+        // Errors Happen. Open an Issue on Github!
         console.error(JSON.stringify(err));
     });
     client.on('end', function () {

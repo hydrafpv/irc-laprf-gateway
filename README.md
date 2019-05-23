@@ -9,6 +9,21 @@ This application can be run on any device with Node.js installed, including:
 # Raspberry Pi Setup
 
 I recommend the Raspbian Stretch Lite OS (smallest image, no desktop, terminal only).
+- Download the Stretch Lite image from https://www.raspberrypi.org/downloads/raspbian/
+- Flash using balenaEtcher to a SD card
+- Mount the SD card and add an empty file named "ssh" to the root directory (this will enable SSH on boot)
+- Also add a file called "wpa_supplicant.conf" with the following contents to have it automatically connect to your WiFi:
+
+```
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=«your_ISO-3166-1_two-letter_country_code»
+
+network={
+    ssid="«Your SSID»"
+    psk="«SSID Password»"
+}
+```
 
 You will need to install Node.js manually (not using apt-get). The version is ARM processor dependent.
 - From the terminal, execute `uname -m` You will get an ARM processor version value, such as "armv71" for ARM Version 7.1.
@@ -20,6 +35,7 @@ You will need to install Node.js manually (not using apt-get). The version is AR
 Raspberry Pi Notes: 
   Install these libraries to use with the gateway, even if you are not using the Puck. 
   The code auto-detects the device.
+- `sudo apt-get install git`
 - `sudo apt-get install libusb-1.0-0-dev`
 - `sudo apt-get install libudev-dev`
 
