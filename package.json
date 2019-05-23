@@ -1,0 +1,17 @@
+{
+  "name": "irc-laprf-gateway",
+  "version": "1.0.0",
+  "description": "Gateway for ImmersionRC Timers. Allows multiple connections to the LapRF Personal Timer (Puck) and the 8-way Event Timer.",
+  "main": "index.js",
+  "author": "HydraFPV",
+  "license": "MIT",
+  "dependencies": {
+    "net": "^1.0.2",
+    "serialport": "^7.1.5",
+    "usb-detection": "^4.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hydrafpv/irc-laprf-gateway.git"
+  }
+}
