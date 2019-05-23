@@ -47,8 +47,12 @@ Raspberry Pi Notes:
 
 # Connections
 
-- Puck: Connect the proper USB cable from the Puck one of the USB ports on the Pi.
-- Event Tracker/LapRF 8-way Timer: Connect an Ethernet (CAT5) cable between the timer and the Ethernet port on the Pi.
+### Puck
+- Raspberry Pi: Use a standard USB micro cable to connect between the Puck and the Pi via one of the 4 USB plugs. 
+- Raspberry Zero: You will need an "OTG USB Micro male to Female USB-2.0 Type-A" cable or adapter (like https://www.amazon.com/Rankie-Female-Adapter-Convertor-3-Pack/dp/B00YOX4JU6). Connect the standard micro USB end to the puck. The OTG adapter must be on the Zero end of the connection.
+- 
+### Event Tracker/LapRF 8-way Timer 
+- Connect an Ethernet (CAT5) cable between the timer and the Ethernet port on the Pi.
 
 # Running
 
