@@ -39,6 +39,12 @@ Raspberry Pi Notes:
 - `sudo apt-get install libusb-1.0-0-dev`
 - `sudo apt-get install libudev-dev`
 
+  Setting the Hostname of the Pi will allow you to connect to it without needing the IP address as well.
+ - `sudo nano /etc/hostname` and set it to something unique
+ - `sudo nano /etc/host.conf` and update the last line to match your hostname file
+
+
+
 # Installation and Setup
 
 - Clone this repository: `git clone https://github.com/hydrafpv/irc-laprf-gateway`
@@ -59,3 +65,33 @@ Raspberry Pi Notes:
 
 Execute `node index.js` in the main folder.
 Connect to the WiFi Gateway instead of the devices directly.
+
+
+# Run on startup
+`sudo nano /etc/systemd/system/irc-laprf-gateway.service`
+
+Contents:
+```
+[Unit]
+Description=IRC LapRF Gateway
+After=multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/pi/irc-laprf-gateway
+ExecStart=/usr/bin/node index.js
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Set the permissions:
+`sudo chmod 644 irc-laprf-gateway.service`
+`sudo systemctl daemon-reload`
+`sudo systemctl enable irc-laprf-gateway.service`
+
+
+
+# ToDos
+- Control port to adjust the IP address of the Timer over the network
+
