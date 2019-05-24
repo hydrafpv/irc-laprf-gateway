@@ -52,7 +52,8 @@ Raspberry Pi Notes:
 - Raspberry Zero: You will need an "OTG USB Micro male to Female USB-2.0 Type-A" cable or adapter (like https://www.amazon.com/Rankie-Female-Adapter-Convertor-3-Pack/dp/B00YOX4JU6). Connect the standard micro USB end to the puck. The OTG adapter must be on the Zero end of the connection.
 - 
 ### Event Tracker/LapRF 8-way Timer 
-- Connect an Ethernet (CAT5) cable between the timer and the Ethernet port on the Pi.
+- Ethernet: Connect the Pi (or whatever is running the Gateway) to the same LAN as the Event Timer. Enter the IP address of the Timer in the `index.js` file. Enter the IP address of the Gateway instead of the Timer in your timing software.
+- USB + WiFi: Open the Event Timer (void that warranty!) and connect the Timer to a Pi Zero using a USB OTG cable. Enter the IP address of the Pi Zero W in your timing software.
 
 # Running
 
