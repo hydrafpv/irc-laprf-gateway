@@ -43,11 +43,11 @@ Raspberry Pi Notes:
 
   Setting the Hostname of the Pi will allow you to connect to it without needing the IP address as well.
  - `sudo nano /etc/hostname` and set it to something unique
- - `sudo nano /etc/host.conf` and update the last line to match your hostname file
 
 # Windows Setup
 
 When installing Node.js for Windows, ensure that you install the "Additional Tools" for compiling NPM packages.
+You will also need to install Apple's "[Bonjour SDK for Windows](https://developer.apple.com/bonjour/)" (Apple ID required). (More info here: https://github.com/agnat/node_mdns)
 
 # Installation and Setup
 
