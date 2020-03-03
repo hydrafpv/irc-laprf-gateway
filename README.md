@@ -28,9 +28,10 @@ network={
 You will need to install Node.js manually (not using apt-get). The version is ARM processor dependent.
 - From the terminal, execute `uname -m` You will get an ARM processor version value, such as "armv71" for ARM Version 7.1.
 - If you are using the Rasberian Stretch Lite OS as suggested above, you will need to visit https://nodejs.org/en/download/ on a separate device to determine which filename to install. On a desktop version of OS, visit and download using the Pi browser.
-- Download the appropriate LTS ARM version: `wget https://nodejs.org/dist/v10.15.3/node-v10.15.3-linux-[your ARM version].tar.xz`
-- Unzip the tar: `tar -xf node-v10.15.3-linux-[your ARM version].tar.xz`
-- Copy the binaries: `sudo cp -R node-v10.15.3-linux-[your ARM version]/* /usr/local/`
+- If you are using a Pi Zero W, the ARM version is 6.1, which is not supported above LTS 10 (https://nodejs.org/dist/latest-v10.x/).
+- Download the appropriate LTS ARM version: `wget https://nodejs.org/dist/v10.19.0/node-v10.19.0-linux-[your ARM version].tar.xz`
+- Unzip the tar: `tar -xf node-v10.19.0-linux-[your ARM version].tar.xz`
+- Copy the binaries: `sudo cp -R node-v10.19.0-linux-[your ARM version]/* /usr/local/`
 
 Raspberry Pi Notes: 
   Install these libraries to use with the gateway, even if you are not using the Puck. 
@@ -38,17 +39,20 @@ Raspberry Pi Notes:
 - `sudo apt-get install git`
 - `sudo apt-get install libusb-1.0-0-dev`
 - `sudo apt-get install libudev-dev`
+- `sudo apt-get install libavahi-compat-libdnssd-dev`
 
   Setting the Hostname of the Pi will allow you to connect to it without needing the IP address as well.
  - `sudo nano /etc/hostname` and set it to something unique
  - `sudo nano /etc/host.conf` and update the last line to match your hostname file
 
+# Windows Setup
 
+When installing Node.js for Windows, ensure that you install the "Additional Tools" for compiling NPM packages.
 
 # Installation and Setup
 
 - Clone this repository: `git clone https://github.com/hydrafpv/irc-laprf-gateway`
-- Install dependencies within the directory created by the repository: `npm install`
+- Install dependencies within the directory created by the repository: `npm install`	
 - If you are using the Event Timer, edit the index.js file and insert the static IP address shown on the screen of the timer. If you are using the Puck, set the Event Timer IP address to "".
 
 # Connections
@@ -64,7 +68,7 @@ Raspberry Pi Notes:
 # Running
 
 Execute `node index.js` in the main folder.
-Connect to the WiFi Gateway instead of the devices directly.
+Connect to the WiFi Gateway instead of the device directly.
 
 
 # Run on startup
@@ -79,18 +83,20 @@ After=multi-user.target
 [Service]
 Type=idle
 WorkingDirectory=/home/pi/irc-laprf-gateway
-ExecStart=/usr/bin/node index.js
+ExecStart=/usr/local/bin/node index.js
 
 [Install]
 WantedBy=multi-user.target
 ```
 
 Set the permissions:
-`sudo chmod 644 irc-laprf-gateway.service`
-`sudo systemctl daemon-reload`
-`sudo systemctl enable irc-laprf-gateway.service`
+- `sudo chmod 644 /etc/systemd/system/irc-laprf-gateway.service`
+- `sudo systemctl daemon-reload`
+- `sudo systemctl enable irc-laprf-gateway.service`
 
-
+# mDNS (Bonjour)
+The gateway will broadcast itself over mDNS which makes discovery much simpler for tools that want to use it. No more punching in IP addresses!
+The advertised service is `_immersionrc._tcp.`.
 
 # ToDos
 - Control port to adjust the IP address of the Timer over the network

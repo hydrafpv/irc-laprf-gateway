@@ -1,30 +1,41 @@
-// Replace this with your Event Timer IP Address (if present)
-const EventTimerIP = "192.168.1.9"; // set to an empty string ("") to use the USB Puck
+// Replace this with your Event Timer IP Address (if present), comment out to use the USB Puck
+// const EventTimerIP = "192.168.1.9";
+
+// Set the port this gateway will listen on (5403 is suggested)
+const gatewayPort = 5403
 
 // Imports
 const SerialPort = require('serialport')
 const Net = require('net');
 const USBDetect = require('usb-detection');
+const mdns = require('mdns');
+
+// Advertise this service over mDNS (Bonjour)
+// Comment out if you do not want to do this (Hydra software uses this to automatically connect)
+const advterise = mdns.createAdvertisement(mdns.tcp('immersionrc'), gatewayPort);
+advterise.start();
 
 // Networked Event Timer
 let eventTimer = null;
+
 // Local USB LapRF Personal Puck
 let puck = null;
-
+ 
 // Keep track of connections to the Puck / Event Timer
 const sockets = {};
 
-// Event Timer Connection (set EventTimerIP to "" if using the Puck. See above.)
-// The Event Timer must be connectable when you run the Gateway.
-// TODO: In the event of an error (not connectable), retry after 20 seconds...?
-if (EventTimerIP && EventTimerIP.length > 0) {
-    console.log('Attempting to connect to Event Timer: ' + EventTimerIP);
-    const timerOptions = {
-        host: EventTimerIP,
-        port: 5403
-    }
-    eventTimer = Net.createConnection(timerOptions, () => {
-        console.log('Event Timer Connected');
+
+function connectEventTimer() {
+    if (typeof EventTimerIP != 'undefined' && EventTimerIP.length > 0 && eventTimer == null) {
+        console.log('Attempting to connect to Event Timer: ' + EventTimerIP);
+        const timerOptions = {
+            host: EventTimerIP,
+            port: 5403
+        }
+        eventTimer = Net.createConnection(timerOptions, () => {
+            console.log('Event Timer Connected');
+        });
+        eventTimer.setTimeout(15000);
         eventTimer.on('data', function (data) {
             console.log('Event Timer Data...');
             // Forward all data (Buffer) to each client socket
@@ -36,18 +47,25 @@ if (EventTimerIP && EventTimerIP.length > 0) {
         });
         eventTimer.on('error', (err) => {
             // Errors Happen. Open an Issue on Github!
-            console.log('Is the Event Timer reachable?');
+            console.log('Event Timer Error');
             console.error(JSON.stringify(err));
+            // eventTimer = null;
+            // connectEventTimer();
+        });
+        eventTimer.on('timeout', function () {
+            console.log('Event Timer Timed out');
+            eventTimer = null;
+            connectEventTimer();
         });
         eventTimer.on('end', function () {
+            console.log('Event Timer Disconnected');
             eventTimer = null;
+            connectEventTimer();
         });
-    });
+    }
+}
 
-} else {
-    // Not Connecting to the Event Timer, connect to USB Puck
-
-    // Open a Serial Port to the Puck at the specified location
+function connectPuck() {
     function openPuck(location) {
         console.log('Puck Connected');
         puck = new SerialPort(location, {
@@ -66,16 +84,27 @@ if (EventTimerIP && EventTimerIP.length > 0) {
 
     // Look for the Puck Serial Device
     function findSerialDevice() {
-        SerialPort.list(function(err, ports) {
-            if (puck == null) {
-                ports.forEach(function(port) {
-                    // Only interested in the ImmersionRC Vendor and LapRF Puck Product
-                    if (port.vendorId === '04d8' & port.productId === '000a') {
-                        openPuck(port.comName);
-                    }
-                });
+        SerialPort.list().then(
+            ports => {
+                if (puck == null) {
+                    ports.forEach(port => {
+                        // Only interested in the ImmersionRC Vendor and LapRF Puck Product
+                        if (port.vendorId === '04d8' & port.productId === '000a') {
+                            openPuck(port.path);
+                        }
+                    });
+                }
+                if (puck == null) {
+                    // If the puck is still null, try again in 5 seconds
+                    setTimeout(findSerialDevice, 5000);
+                }
+            },
+            err => {
+                console.error(err);
+                // Some error occurred ... go ahead and try again in 5 seconds
+                setTimeout(findSerialDevice, 5000);
             }
-        });
+        )
     }
 
     // Do an initial search for the USB Puck at launch
@@ -98,6 +127,17 @@ if (EventTimerIP && EventTimerIP.length > 0) {
         puck = null;
     });
 }
+
+
+
+// Event Timer or USB Puck?
+if (typeof EventTimerIP != 'undefined' && EventTimerIP.length > 0) {
+    connectEventTimer();
+} else {
+    connectPuck();
+}
+
+
 
 // Main server for client connections to the Gateway.
 const server = Net.createServer(client => {
@@ -129,7 +169,7 @@ server.on('error', (err) => {
 server.on('close', () => {
     console.log('TCP server: Socket Closed.');
 });
-// Start listening on the ImmersionRC Network Port (5403)
-server.listen(5403, () => {
+// Start listening on the ImmersionRC Network Port (gatewayPort)
+server.listen(gatewayPort, () => {
     console.log('TCP server: ' + JSON.stringify(server.address()));
 });

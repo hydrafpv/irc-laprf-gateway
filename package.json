@@ -7,8 +7,9 @@
   "license": "MIT",
   "dependencies": {
     "net": "^1.0.2",
-    "serialport": "^7.1.5",
-    "usb-detection": "^4.2.0"
+    "serialport": "^8.0.7",
+    "usb-detection": "^4.7.0",
+    "mdns": "2.5.1"
   },
   "repository": {
     "type": "git",
