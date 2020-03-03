@@ -99,5 +99,6 @@ The gateway will broadcast itself over mDNS which makes discovery much simpler f
 The advertised service is `_immersionrc._tcp.`.
 
 # ToDos
+- Expose a BLE Service (on supported devices) to change the WiFi SSID / PASS
 - Control port to adjust the IP address of the Timer over the network
 
