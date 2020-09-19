@@ -179,6 +179,6 @@ server.listen(gatewayPort, () => {
 
 // Overload default log function to output to file and stdout
 console.log = function(d) { //
-  log_file.write(util.format(d) + '\n');
-  log_stdout.write(util.format(d) + '\n');
+    log_file.write(util.format(d) + '\n');
+    log_stdout.write(util.format(d) + '\n');
 };
