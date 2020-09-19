@@ -5,10 +5,15 @@
 const gatewayPort = 5403
 
 // Imports
+const fs = require('fs');
+const util = require('util');
 const SerialPort = require('serialport')
 const Net = require('net');
 const USBDetect = require('usb-detection');
 const mdns = require('mdns');
+
+var log_file = fs.createWriteStream('/var/log/laptimergw/debug.log', {flags : 'w'});
+var log_stdout = process.stdout;
 
 // Advertise this service over mDNS (Bonjour)
 // Comment out if you do not want to do this (Hydra software uses this to automatically connect)
@@ -20,10 +25,9 @@ let eventTimer = null;
 
 // Local USB LapRF Personal Puck
 let puck = null;
- 
+
 // Keep track of connections to the Puck / Event Timer
 const sockets = {};
-
 
 function connectEventTimer() {
     if (typeof EventTimerIP != 'undefined' && EventTimerIP.length > 0 && eventTimer == null) {
@@ -128,8 +132,6 @@ function connectPuck() {
     });
 }
 
-
-
 // Event Timer or USB Puck?
 if (typeof EventTimerIP != 'undefined' && EventTimerIP.length > 0) {
     connectEventTimer();
@@ -137,13 +139,11 @@ if (typeof EventTimerIP != 'undefined' && EventTimerIP.length > 0) {
     connectPuck();
 }
 
-
-
 // Main server for client connections to the Gateway.
 const server = Net.createServer(client => {
     // Client connected, store it where the Puck / Event Timer can get at it
     sockets[client.remoteAddress] = client;
-    client.on('data', function (data) {    
+    client.on('data', function (data) {
         console.log('Socket Data...');
         if (eventTimer) {
             console.log('      ... Forwarding to Event Timer');
@@ -162,14 +162,23 @@ const server = Net.createServer(client => {
         delete sockets[client.remoteAddress];
     });
 });
+
 server.on('error', (err) => {
     // Errors Happen. Open an Issue on Github!
     console.error('TCP server: ' + JSON.stringify(err));
 });
+
 server.on('close', () => {
     console.log('TCP server: Socket Closed.');
 });
 // Start listening on the ImmersionRC Network Port (gatewayPort)
+
 server.listen(gatewayPort, () => {
     console.log('TCP server: ' + JSON.stringify(server.address()));
 });
+
+// Overload default log function to output to file and stdout
+console.log = function(d) { //
+  log_file.write(util.format(d) + '\n');
+  log_stdout.write(util.format(d) + '\n');
+};
