@@ -33,13 +33,16 @@ You will need to install Node.js manually (not using apt-get). The version is AR
 - Unzip the tar: `tar -xf node-v10.19.0-linux-[your ARM version].tar.xz`
 - Copy the binaries: `sudo cp -R node-v10.19.0-linux-[your ARM version]/* /usr/local/`
 
-Raspberry Pi Notes: 
-  Install these libraries to use with the gateway, even if you are not using the Puck. 
+Raspberry Pi Notes:
+  Install these libraries to use with the gateway, even if you are not using the Puck.
   The code auto-detects the device.
 - `sudo apt-get install git`
 - `sudo apt-get install libusb-1.0-0-dev`
 - `sudo apt-get install libudev-dev`
 - `sudo apt-get install libavahi-compat-libdnssd-dev`
+
+  Create the log file directory so you can see the output if the gateway is running as a daemon
+- `sudo mkdir /var/log/laptimergw`
 
   Setting the Hostname of the Pi will allow you to connect to it without needing the IP address as well.
  - `sudo nano /etc/hostname` and set it to something unique
@@ -52,16 +55,16 @@ You will also need to install Apple's "[Bonjour SDK for Windows](https://develop
 # Installation and Setup
 
 - Clone this repository: `git clone https://github.com/hydrafpv/irc-laprf-gateway`
-- Install dependencies within the directory created by the repository: `npm install`	
+- Install dependencies within the directory created by the repository: `npm install`
 - If you are using the Event Timer, edit the index.js file and insert the static IP address shown on the screen of the timer. If you are using the Puck, set the Event Timer IP address to "".
 
 # Connections
 
 ### Puck
-- Raspberry Pi: Use a standard USB micro cable to connect between the Puck and the Pi via one of the 4 USB plugs. 
+- Raspberry Pi: Use a standard USB micro cable to connect between the Puck and the Pi via one of the 4 USB plugs.
 - Raspberry Zero: You will need an "OTG USB Micro male to Female USB-2.0 Type-A" cable or adapter (like https://www.amazon.com/Rankie-Female-Adapter-Convertor-3-Pack/dp/B00YOX4JU6). Connect the standard micro USB end to the puck. The OTG adapter must be on the Zero end of the connection.
-- 
-### Event Tracker/LapRF 8-way Timer 
+-
+### Event Tracker/LapRF 8-way Timer
 - Ethernet: Connect the Pi (or whatever is running the Gateway) to the same LAN as the Event Timer. Enter the IP address of the Timer in the `index.js` file. Enter the IP address of the Gateway instead of the Timer in your timing software.
 - USB + WiFi: Open the Event Timer (void that warranty!) and connect the Timer to a Pi Zero using a USB OTG cable. Enter the IP address of the Pi Zero W in your timing software.
 
@@ -101,4 +104,3 @@ The advertised service is `_immersionrc._tcp.`.
 # ToDos
 - Expose a BLE Service (on supported devices) to change the WiFi SSID / PASS
 - Control port to adjust the IP address of the Timer over the network
-
