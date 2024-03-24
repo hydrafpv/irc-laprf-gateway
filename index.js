@@ -22,6 +22,7 @@ let eventTimer = null;
 let puck = null;
  
 // Keep track of connections to the Puck / Event Timer
+let master = null;
 const sockets = {};
 
 
@@ -142,15 +143,20 @@ if (typeof EventTimerIP != 'undefined' && EventTimerIP.length > 0) {
 // Main server for client connections to the Gateway.
 const server = Net.createServer(client => {
     // Client connected, store it where the Puck / Event Timer can get at it
+    if (master == null) {
+        master = client.remoteAddress;
+    }
     sockets[client.remoteAddress] = client;
     client.on('data', function (data) {    
-        console.log('Socket Data...');
-        if (eventTimer) {
-            console.log('      ... Forwarding to Event Timer');
-            eventTimer.write(data);
-        } else if (puck) {
-            console.log('      ... Forwarding to Puck');
-            puck.write(data);
+        if (master == client.remoteAddress) {
+            console.log('Socket Data...');
+            if (eventTimer) {
+                console.log('      ... Forwarding to Event Timer');
+                eventTimer.write(data);
+            } else if (puck) {
+                console.log('      ... Forwarding to Puck');
+                puck.write(data);
+            }
         }
     });
     client.on('error', (err) => {
@@ -160,6 +166,10 @@ const server = Net.createServer(client => {
     client.on('end', function () {
         // Remove this Client from the socket object
         delete sockets[client.remoteAddress];
+        // If the client disconnecting is the master, null it out
+        if (master == client.remoteAddress) {
+            master = null;
+        }
     });
 });
 server.on('error', (err) => {
